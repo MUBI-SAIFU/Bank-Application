@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DatabaseService } from '../Services/database.service';
 
 @Component({
   selector: 'app-login',
@@ -17,86 +20,90 @@ export class LoginComponent implements OnInit {
   accno="Your Account No Please"  //used in property binding
 
 
-  users:any = {
-    //primary key will be account number
-    1000:{acno:1000,uname:"Neer",password:"1000",balance:5000},
-    1001:{acno:1001,uname:"Laisha",password:"1001",balance:5000},
-    1002:{acno:1002,uname:"Vyom",password:"1002",balance:5000}
+  
 
-  }
-
-  acno=""   // to hold user typed account numbers
+  acno=""   // to hold user typed account numbers 
+  //this is used as variable for two way binding. inside ngModel
 
   pswd=""   // to hold user typed password
+  //this is used as variable for two way binding. inside ngModel
 
-  constructor() { }
+
+  loginForm = this.fb.group({
+    acno: ['',[Validators.required,Validators.pattern('[0-9]*')]],//accept only numbers
+    pswd: ['',[Validators.required,Validators.pattern('[a-zA-Z0-9]*')]]//accept bot umbers and letters
+
+  })
+
+
+
+//dependency injection from Router class to use navigateByUrl method to redirect to dashboard page
+  constructor(private router:Router,private ds:DatabaseService,private fb:FormBuilder) {
+
+   }
 
   ngOnInit(): void {
   }
 
 
-  acnoChange(event:any){   //if we are not sure about the data type of argument use 'any'
-   this.acno=event.target.value; //user entered account no taken
-   console.log(this.acno);
+  // acnoChange(event:any){   //if we are not sure about the data type of argument use 'any'
+  //  this.acno=event.target.value; //user entered account no taken
+  //  console.log(this.acno);
    
-  }
-
-  pswdChange(event:any){   //if we are not sure about the data type of argument use 'any'
-    this.pswd=event.target.value; //user entered password taken
-    console.log(this.pswd);
-    
-   }
-
-
-
-  // login(){
-
-  //   var account_no= this.acno;
-  //   var password= this.pswd;
-
-  //   let database= this.users;
-    
-    
-  //   if(account_no in database){
-  //     if(password == database[account_no]["password"]){
-  //       alert("login success")
-
-  //     }
-  //     else{
-  //       alert("invalid password")
-  //     }
-
-  //   }
-  //   else{
-  //     alert("invalid account number")
-  //   }
-
   // }
 
-login(a:any,p:any){ //since it is a template reference variable evoked function
-
-  var account_no= a.value;//user entered value 
-    var password= p.value;//user entered value
-
-    let database= this.users;
+  // pswdChange(event:any){   //if we are not sure about the data type of argument use 'any'
+  //   this.pswd=event.target.value; //user entered password taken
+  //   console.log(this.pswd);
     
+  //  }
+
+
+
+  login(){
+
+    var acno = this.loginForm.value.acno
+    var password = this.loginForm.value.pswd
+
+
+    if(this.loginForm.valid){
+      let result= this.ds.login(acno,password)
     
-    if(account_no in database){
-      if(password == database[account_no]["password"]){
-        alert("login success")
 
-      }
-      else{
-        alert("invalid password")
-      }
-
-    }
-    else{
-      alert("invalid account number")
+    if(result){
+      alert("Login Success")
+      this.router.navigateByUrl('dashboard')
     }
 
   }
+
+  else{
+    alert("Invalid Form")
+  }
+
+// login(a:any,p:any){ //since it is a template reference variable evoked function
+
+//   var account_no= a.value;//user entered value 
+//     var password= p.value;//user entered value
+
+//     let database= this.users;
+    
+    
+//     if(account_no in database){
+//       if(password == database[account_no]["password"]){
+//         alert("login success")
+
+//       }
+//       else{
+//         alert("invalid password")
+//       }
+
+//     }
+//     else{
+//       alert("invalid account number")
+//     }
+
+//   }
   
-
-
+  }
 }
